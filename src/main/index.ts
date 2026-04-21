@@ -1,11 +1,14 @@
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import path from 'node:path';
 import { createFloatingWindow } from './windows/floatingWindow';
+import { PreferencesStore } from './services/preferences';
+import { registerPrefsHandlers } from './ipc/handlers';
 
 const isDev = !app.isPackaged;
 
 let mainWin: BrowserWindow | null = null;
 let floatWin: BrowserWindow | null = null;
+let prefs: PreferencesStore;
 
 let dragMoveTimer: NodeJS.Timeout | null = null;
 let dragOffset = { x: 0, y: 0 };
@@ -51,7 +54,11 @@ function createMainWindow(): BrowserWindow {
   return win;
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  prefs = new PreferencesStore(app.getPath('userData'));
+  await prefs.load();
+  registerPrefsHandlers(prefs);
+
   ipcMain.handle('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
   ipcMain.handle('win:maximize', (e) => {
     const w = BrowserWindow.fromWebContents(e.sender);

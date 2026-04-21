@@ -1,5 +1,35 @@
 export type WindowKind = 'main' | 'floating';
 
+import type { Theme, MascotKind, FloatingVariant } from './tokens';
+
+export interface Preferences {
+  theme: Theme;
+  mascotKind: MascotKind;
+  floatingVariant: FloatingVariant;
+  floatingPos: { x: number; y: number } | null;
+  startOnBoot: boolean;
+  idleDetection: boolean;
+  sedentaryReminder: boolean;
+  dailySummary: boolean;
+  floatingEnabled: boolean;
+  privacyBlank: boolean;
+  appLimits: Record<string, number>;
+}
+
+export const DEFAULT_PREFS: Preferences = {
+  theme: 'light',
+  mascotKind: 'cloud',
+  floatingVariant: 'A',
+  floatingPos: null,
+  startOnBoot: false,
+  idleDetection: true,
+  sedentaryReminder: true,
+  dailySummary: false,
+  floatingEnabled: true,
+  privacyBlank: false,
+  appLimits: {},
+};
+
 export interface Api {
   getWindowKind: () => WindowKind;
   win: {
@@ -11,5 +41,10 @@ export interface Api {
     startDrag: (offsetX: number, offsetY: number) => void;
     stopDrag: () => void;
     openMain: () => void;
+  };
+  prefs: {
+    get: () => Promise<Preferences>;
+    set: <K extends keyof Preferences>(key: K, value: Preferences[K]) => Promise<Preferences>;
+    onChange: (cb: (p: Preferences) => void) => () => void;
   };
 }
