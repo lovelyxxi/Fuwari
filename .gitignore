@@ -1,0 +1,11 @@
+node_modules/
+dist/
+out/
+.vite/
+*.log
+.env
+.env.local
+*.sqlite
+*.sqlite-journal
+.DS_Store
+Thumbs.db
