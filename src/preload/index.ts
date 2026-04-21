@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Api, WindowKind, Preferences, TodaySummary, UsageEvent, TickPayload, CurrentAppInfo } from '../shared/types';
+import type { Api, WindowKind, Preferences, TodaySummary, UsageEvent, TickPayload, CurrentAppInfo, FocusState } from '../shared/types';
 import { CH } from '../shared/channels';
 
 const kind: WindowKind =
@@ -41,6 +41,18 @@ const api: Api = {
       const l = (_e: Electron.IpcRendererEvent, info: CurrentAppInfo | null) => cb(info);
       ipcRenderer.on(CH.CURRENT_APP, l);
       return () => { ipcRenderer.removeListener(CH.CURRENT_APP, l); };
+    },
+  },
+  focus: {
+    get:     (): Promise<FocusState> => ipcRenderer.invoke(CH.FOCUS_GET),
+    start:   (mins?: number): Promise<void> => ipcRenderer.invoke(CH.FOCUS_START, mins),
+    pause:   (): Promise<void> => ipcRenderer.invoke(CH.FOCUS_PAUSE),
+    reset:   (): Promise<void> => ipcRenderer.invoke(CH.FOCUS_RESET),
+    setTask: (t: string): Promise<void> => ipcRenderer.invoke(CH.FOCUS_SET_TASK, t),
+    onUpdate: (cb: (s: FocusState) => void) => {
+      const l = (_e: Electron.IpcRendererEvent, s: FocusState) => cb(s);
+      ipcRenderer.on(CH.FOCUS_UPDATE, l);
+      return () => { ipcRenderer.removeListener(CH.FOCUS_UPDATE, l); };
     },
   },
 };

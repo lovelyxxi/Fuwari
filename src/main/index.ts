@@ -1,18 +1,27 @@
-import { app, BrowserWindow, ipcMain, screen } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, Notification } from 'electron';
 import path from 'node:path';
 import { createFloatingWindow } from './windows/floatingWindow';
 import { PreferencesStore } from './services/preferences';
-import { registerPrefsHandlers, registerDataHandlers } from './ipc/handlers';
+import { registerPrefsHandlers, registerDataHandlers, registerFocusHandlers, prefEvents } from './ipc/handlers';
 import { openDatabase } from './services/database';
 import { EventRepository } from './services/repository';
 import { Tracker } from './services/tracker';
 import { IdleMonitor } from './services/idle';
+import { Focus } from './services/focus';
+import { setAutoStart } from './services/autoStart';
+import { createTray } from './services/tray';
+import type { Preferences } from '../shared/types';
 
 const isDev = !app.isPackaged;
 
+// Handle --hidden CLI arg (set when auto-started on boot)
+const startHidden = process.argv.includes('--hidden');
+
 let mainWin: BrowserWindow | null = null;
 let floatWin: BrowserWindow | null = null;
+let tray: Electron.Tray | null = null;
 let prefs: PreferencesStore;
+let focus: Focus;
 
 let dragMoveTimer: NodeJS.Timeout | null = null;
 let dragOffset = { x: 0, y: 0 };
@@ -34,13 +43,14 @@ function stopFloatingDrag() {
 }
 
 function createMainWindow(): BrowserWindow {
+  const themeBg = prefs.get().theme === 'dark' ? '#1E1E2A' : '#F5F1E8';
   const win = new BrowserWindow({
     width: 960,
     height: 620,
     minWidth: 840,
     minHeight: 560,
     frame: false,
-    backgroundColor: '#F5F1E8',
+    backgroundColor: themeBg,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -58,10 +68,22 @@ function createMainWindow(): BrowserWindow {
   return win;
 }
 
+let moveDebounce: NodeJS.Timeout | null = null;
+
+function attachFloatingMoveListener(w: BrowserWindow) {
+  w.on('move', () => {
+    if (moveDebounce) clearTimeout(moveDebounce);
+    moveDebounce = setTimeout(() => {
+      if (w.isDestroyed()) return;
+      const [x, y] = w.getPosition();
+      void prefs.set('floatingPos', { x, y });
+    }, 500);
+  });
+}
+
 app.whenReady().then(async () => {
   prefs = new PreferencesStore(app.getPath('userData'));
   await prefs.load();
-  registerPrefsHandlers(prefs);
 
   const dbPath = path.join(app.getPath('userData'), 'events.sqlite');
   const db = openDatabase(dbPath);
@@ -74,12 +96,46 @@ app.whenReady().then(async () => {
   idleMon.on('idle', () => { if (prefs.get().idleDetection) tracker.pause(); });
   idleMon.on('active', () => tracker.resume());
 
-  registerDataHandlers(repo, prefs, tracker, null);
+  focus = new Focus();
+
+  registerPrefsHandlers(prefs);
+  registerFocusHandlers(focus);
+  registerDataHandlers(repo, prefs, tracker, focus);
+
+  // Auto-start from prefs
+  setAutoStart(prefs.get().startOnBoot);
+
+  // Sedentary reminder — every 45 min
+  setInterval(() => {
+    if (!prefs.get().sedentaryReminder) return;
+    if (idleMon.isIdle()) return;
+    if (focus.isRunning()) return;
+    new Notification({
+      title: '云云来提醒啦～',
+      body: '站起来动一动吧，眼睛也歇一歇～',
+      silent: false,
+    }).show();
+  }, 45 * 60 * 1000);
+
+  // React to pref changes
+  prefEvents.on('change', (p: Preferences, key: keyof Preferences) => {
+    if (key === 'startOnBoot') setAutoStart(p.startOnBoot);
+    if (key === 'floatingEnabled') {
+      if (p.floatingEnabled && (!floatWin || floatWin.isDestroyed())) {
+        floatWin = createFloatingWindow(prefs.get().floatingPos);
+        attachFloatingMoveListener(floatWin);
+      } else if (!p.floatingEnabled && floatWin && !floatWin.isDestroyed()) {
+        floatWin.close();
+        floatWin = null;
+      }
+    }
+  });
 
   app.on('before-quit', () => {
     tracker.stop();
     idleMon.stop();
     db.close();
+    if (tray) tray.destroy();
   });
 
   ipcMain.handle('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
@@ -116,16 +172,40 @@ app.whenReady().then(async () => {
   });
 
   mainWin = createMainWindow();
-  floatWin = createFloatingWindow();
+  if (startHidden) mainWin.hide();
+
+  if (prefs.get().floatingEnabled) {
+    floatWin = createFloatingWindow(prefs.get().floatingPos);
+    attachFloatingMoveListener(floatWin);
+  }
+
+  tray = createTray({
+    getMainWin: () => mainWin,
+    onStartFocus: () => focus.start(25),
+    onPauseTracker: () => tracker.pause(),
+    onOpenSettings: () => {
+      const w = mainWin;
+      if (w && !w.isDestroyed()) {
+        if (w.isMinimized()) w.restore();
+        w.show();
+        w.focus();
+      }
+    },
+    onQuit: () => app.quit(),
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWin = createMainWindow();
-      floatWin = createFloatingWindow();
+      if (prefs.get().floatingEnabled) {
+        floatWin = createFloatingWindow(prefs.get().floatingPos);
+        attachFloatingMoveListener(floatWin);
+      }
     }
   });
 });
 
+// Keep app alive in tray when all windows are closed
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  // Intentionally do not quit — user quits via tray menu.
 });

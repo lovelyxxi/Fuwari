@@ -63,6 +63,14 @@ export interface TickPayload {
   mood: Mood;
 }
 
+export interface FocusState {
+  running: boolean;
+  remainingSecs: number;
+  durationSecs: number;
+  task: string;
+  completedToday: number;
+}
+
 export interface Api {
   getWindowKind: () => WindowKind;
   win: {
@@ -87,5 +95,13 @@ export interface Api {
     exportAll: () => Promise<UsageEvent[]>;
     onTick: (cb: (p: TickPayload) => void) => () => void;
     onCurrentApp: (cb: (info: CurrentAppInfo | null) => void) => () => void;
+  };
+  focus: {
+    get: () => Promise<FocusState>;
+    start: (mins?: number) => Promise<void>;
+    pause: () => Promise<void>;
+    reset: () => Promise<void>;
+    setTask: (t: string) => Promise<void>;
+    onUpdate: (cb: (s: FocusState) => void) => () => void;
   };
 }

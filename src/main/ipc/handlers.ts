@@ -1,12 +1,16 @@
 import { ipcMain, BrowserWindow } from 'electron';
+import { EventEmitter } from 'node:events';
 import { CH } from '../../shared/channels';
 import type { PreferencesStore } from '../services/preferences';
 import type { Preferences, TodaySummary, TickPayload } from '../../shared/types';
 import type { EventRepository } from '../services/repository';
 import type { Tracker } from '../services/tracker';
+import type { Focus } from '../services/focus';
 import { aggregateDay, startOfToday } from '../services/aggregator';
 import { computeMood } from '../services/mood';
 import type { CurrentAppInfo } from '../../shared/types';
+
+export const prefEvents = new EventEmitter();
 
 export function registerPrefsHandlers(prefs: PreferencesStore) {
   ipcMain.handle(CH.PREFS_GET, () => prefs.get());
@@ -15,7 +19,19 @@ export function registerPrefsHandlers(prefs: PreferencesStore) {
     for (const w of BrowserWindow.getAllWindows()) {
       w.webContents.send(CH.PREFS_CHANGED, updated);
     }
+    prefEvents.emit('change', updated, key);
     return updated;
+  });
+}
+
+export function registerFocusHandlers(focus: Focus) {
+  ipcMain.handle(CH.FOCUS_GET, () => focus.getState());
+  ipcMain.handle(CH.FOCUS_START, (_e, mins?: number) => { focus.start(mins ?? 25); });
+  ipcMain.handle(CH.FOCUS_PAUSE, () => focus.pause());
+  ipcMain.handle(CH.FOCUS_RESET, () => focus.reset());
+  ipcMain.handle(CH.FOCUS_SET_TASK, (_e, t: string) => focus.setTask(t));
+  focus.on('update', (s) => {
+    for (const w of BrowserWindow.getAllWindows()) w.webContents.send(CH.FOCUS_UPDATE, s);
   });
 }
 

@@ -1,24 +1,17 @@
-import { useEffect, useState } from 'react';
 import { DoodleButton } from '../../components/primitives/DoodleButton';
+import { useFocus } from '../../hooks/useFocus';
 
 export function TabFocus() {
-  const [running, setRunning] = useState(false);
-  const [secs, setSecs] = useState(25 * 60);
+  const fs = useFocus();
+  if (!fs) return <div style={{ padding: 40, fontFamily: 'var(--font-hand)', fontSize: 28 }}>加载中…</div>;
 
-  useEffect(() => {
-    if (!running) return;
-    const t = setInterval(() => setSecs((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(t);
-  }, [running]);
-
-  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-  const ss = String(secs % 60).padStart(2, '0');
-  const pct = 1 - secs / (25 * 60);
+  const mm = String(Math.floor(fs.remainingSecs / 60)).padStart(2, '0');
+  const ss = String(fs.remainingSecs % 60).padStart(2, '0');
+  const pct = 1 - fs.remainingSecs / fs.durationSecs;
 
   return (
     <div style={{ padding: '20px 32px 28px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24 }}>
-        {/* left: tomato timer */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--font-hand)', fontSize: 32, color: 'var(--ink)' }}>来颗番茄吧 🍅</div>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 2 }}>专心 25 分钟，休息 5 分钟</div>
@@ -38,24 +31,28 @@ export function TabFocus() {
           </div>
 
           <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-            <DoodleButton variant="primary" onClick={() => setRunning((r) => !r)}>
-              {running ? '⏸ 暂停' : '▶ 开始专注'}
+            <DoodleButton
+              variant="primary"
+              onClick={() => fs.running ? void window.api.focus.pause() : void window.api.focus.start(25)}
+            >
+              {fs.running ? '⏸ 暂停' : '▶ 开始专注'}
             </DoodleButton>
-            <DoodleButton onClick={() => { setRunning(false); setSecs(25 * 60); }}>↺ 重置</DoodleButton>
+            <DoodleButton onClick={() => void window.api.focus.reset()}>↺ 重置</DoodleButton>
           </div>
         </div>
 
-        {/* right: today's tomatoes + task + options */}
         <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div className="doodle-border b-tight" style={{ padding: '14px 16px', background: 'var(--cloud-white)' }}>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)', fontWeight: 700, letterSpacing: 1 }}>今天的番茄</div>
-            <div style={{ fontFamily: 'var(--font-hand)', fontSize: 30, color: 'var(--ink)', lineHeight: 1, margin: '4px 0 10px' }}>5 / 8</div>
+            <div style={{ fontFamily: 'var(--font-hand)', fontSize: 30, color: 'var(--ink)', lineHeight: 1, margin: '4px 0 10px' }}>
+              {fs.completedToday} / 8
+            </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} style={{ width: 24, height: 24, opacity: i < 5 ? 1 : 0.35 }}>
+                <div key={i} style={{ width: 24, height: 24, opacity: i < fs.completedToday ? 1 : 0.35 }}>
                   <svg viewBox="0 0 24 24" width="24" height="24">
                     <circle cx="12" cy="14" r="8"
-                      fill={i < 5 ? 'var(--peach)' : 'var(--paper-deep)'}
+                      fill={i < fs.completedToday ? 'var(--peach)' : 'var(--paper-deep)'}
                       stroke="var(--line)" strokeWidth="1.5" />
                     <path d="M 9 6 Q 12 3 15 6" stroke="var(--line)" strokeWidth="1.5" fill="var(--mint)" />
                   </svg>
@@ -66,11 +63,16 @@ export function TabFocus() {
 
           <div className="doodle-border b-tight" style={{ padding: '14px 16px', background: 'var(--cloud-white)' }}>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>本轮任务</div>
-            <input defaultValue="完成屏幕时间 App 的 UI" style={{
-              width: '100%', border: 'none', borderBottom: '1.5px dashed var(--ink-mute)',
-              background: 'transparent', fontSize: 14, padding: '4px 0', outline: 'none',
-              color: 'var(--ink)', fontFamily: 'inherit',
-            }} />
+            <input
+              defaultValue={fs.task}
+              onBlur={(e) => void window.api.focus.setTask(e.target.value)}
+              placeholder="在这里写下目标..."
+              style={{
+                width: '100%', border: 'none', borderBottom: '1.5px dashed var(--ink-mute)',
+                background: 'transparent', fontSize: 14, padding: '4px 0', outline: 'none',
+                color: 'var(--ink)', fontFamily: 'inherit',
+              }}
+            />
           </div>
 
           <div className="doodle-border b-tight" style={{ padding: '14px 16px', background: 'var(--lemon)' }}>

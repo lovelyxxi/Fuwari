@@ -3,14 +3,16 @@ import path from 'node:path';
 
 const isDev = !app.isPackaged;
 
-export function createFloatingWindow(): BrowserWindow {
+export function createFloatingWindow(savedPos?: { x: number; y: number } | null): BrowserWindow {
   const { workArea } = screen.getPrimaryDisplay();
+  const defaultX = workArea.x + workArea.width - 320;
+  const defaultY = workArea.y + workArea.height - 400;
 
   const win = new BrowserWindow({
     width: 300,
     height: 380,
-    x: workArea.x + workArea.width - 320,
-    y: workArea.y + workArea.height - 400,
+    x: savedPos?.x ?? defaultX,
+    y: savedPos?.y ?? defaultY,
     frame: false,
     transparent: true,
     resizable: false,
