@@ -82,6 +82,9 @@ export interface Api {
     startDrag: (offsetX: number, offsetY: number) => void;
     stopDrag: () => void;
     openMain: () => void;
+    setPillRect: (rect: { x: number; y: number; w: number; h: number } | null) => void;
+    onPillHover: (cb: (inside: boolean) => void) => () => void;
+    onContextMenu: (cb: () => void) => () => void;
   };
   prefs: {
     get: () => Promise<Preferences>;

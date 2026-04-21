@@ -11,6 +11,7 @@ import { Focus } from './services/focus';
 import { setAutoStart } from './services/autoStart';
 import { createTray } from './services/tray';
 import type { Preferences } from '../shared/types';
+import { CH } from '../shared/channels';
 
 const isDev = !app.isPackaged;
 
@@ -124,6 +125,7 @@ app.whenReady().then(async () => {
       if (p.floatingEnabled && (!floatWin || floatWin.isDestroyed())) {
         floatWin = createFloatingWindow(prefs.get().floatingPos);
         attachFloatingMoveListener(floatWin);
+        wireContextMenu(floatWin);
       } else if (!p.floatingEnabled && floatWin && !floatWin.isDestroyed()) {
         floatWin.close();
         floatWin = null;
@@ -161,6 +163,42 @@ app.whenReady().then(async () => {
 
   ipcMain.on('floating:stop-drag', () => stopFloatingDrag());
 
+  // Pill-hover detection: renderer reports pill's rect within its window; main polls the real
+  // cursor position and notifies the renderer when it enters/leaves the pill rect. This is
+  // needed because `-webkit-app-region: drag` on the pill swallows all DOM mouse events.
+  let pillRectInWindow: { x: number; y: number; w: number; h: number } | null = null;
+  let lastCursorInsidePill = false;
+  ipcMain.on(CH.FLOATING_SET_PILL_RECT, (_e, rect: { x: number; y: number; w: number; h: number } | null) => {
+    pillRectInWindow = rect;
+    lastCursorInsidePill = false;
+  });
+  setInterval(() => {
+    if (!floatWin || floatWin.isDestroyed() || !pillRectInWindow) return;
+    const c = screen.getCursorScreenPoint();
+    const b = floatWin.getBounds();
+    const px = b.x + pillRectInWindow.x;
+    const py = b.y + pillRectInWindow.y;
+    const inside =
+      c.x >= px && c.x < px + pillRectInWindow.w &&
+      c.y >= py && c.y < py + pillRectInWindow.h;
+    if (inside !== lastCursorInsidePill) {
+      lastCursorInsidePill = inside;
+      floatWin.webContents.send(CH.FLOATING_PILL_HOVER, inside);
+    }
+  }, 30);
+
+  // Right-click on the pill: context-menu event fires even on drag regions;
+  // forward to renderer when cursor is within the pill rect.
+  const wireContextMenu = (w: BrowserWindow) => {
+    w.webContents.on('context-menu', (_e, params) => {
+      if (!pillRectInWindow) return;
+      const inside =
+        params.x >= pillRectInWindow.x && params.x < pillRectInWindow.x + pillRectInWindow.w &&
+        params.y >= pillRectInWindow.y && params.y < pillRectInWindow.y + pillRectInWindow.h;
+      if (inside) w.webContents.send('floating:context-menu');
+    });
+  };
+
   ipcMain.on('floating:open-main', () => {
     if (!mainWin || mainWin.isDestroyed()) {
       mainWin = createMainWindow();
@@ -177,6 +215,7 @@ app.whenReady().then(async () => {
   if (prefs.get().floatingEnabled) {
     floatWin = createFloatingWindow(prefs.get().floatingPos);
     attachFloatingMoveListener(floatWin);
+    wireContextMenu(floatWin);
   }
 
   tray = createTray({
@@ -200,6 +239,7 @@ app.whenReady().then(async () => {
       if (prefs.get().floatingEnabled) {
         floatWin = createFloatingWindow(prefs.get().floatingPos);
         attachFloatingMoveListener(floatWin);
+        wireContextMenu(floatWin);
       }
     }
   });

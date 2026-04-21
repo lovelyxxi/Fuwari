@@ -2,6 +2,7 @@ import { AppIcon } from '../../components/primitives/AppIcon';
 import { CloudMascot } from '../../components/mascots/CloudMascot';
 import { DoodleButton } from '../../components/primitives/DoodleButton';
 import { fmtMins } from '../../utils/fmt';
+import { useFocus } from '../../hooks/useFocus';
 import type { Mood } from '@shared/tokens';
 import type { CurrentApp, CategorySlice } from '../FloatingWidget';
 
@@ -14,8 +15,15 @@ interface ExpandedCardProps {
 }
 
 export function ExpandedCard({ curApp, todayMins, mood, categoryBreakdown, onClose }: ExpandedCardProps) {
+  const focus = useFocus();
+  const focusRunning = focus?.running ?? false;
+  const focusMM = focus ? String(Math.floor(focus.remainingSecs / 60)).padStart(2, '0') : '25';
+  const focusSS = focus ? String(focus.remainingSecs % 60).padStart(2, '0') : '00';
+  const focusPartial = focus ? focus.remainingSecs < focus.durationSecs && focus.remainingSecs > 0 : false;
+
   return (
     <div
+      data-widget-popover
       className="doodle-border"
       style={{
         position: 'absolute',
@@ -130,13 +138,36 @@ export function ExpandedCard({ curApp, todayMins, mood, categoryBreakdown, onClo
 
       {/* 3-button row */}
       <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-        <DoodleButton variant="primary" style={{ flex: 1, padding: '6px 8px', fontSize: 12 }}>
-          🍅 专注
+        <DoodleButton
+          variant="primary"
+          onClick={() => {
+            if (focusRunning) void window.api.focus.pause();
+            else void window.api.focus.start(25);
+          }}
+          style={{ flex: 1, padding: '6px 8px', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}
+        >
+          {focusRunning ? `⏸ ${focusMM}:${focusSS}` : '🍅 专注'}
         </DoodleButton>
-        <DoodleButton variant="mint" style={{ flex: 1, padding: '6px 8px', fontSize: 12 }}>
+        <DoodleButton
+          variant="mint"
+          onClick={() => window.api.floating.openMain()}
+          style={{ flex: 1, padding: '6px 8px', fontSize: 12 }}
+        >
           ⤢ 打开
         </DoodleButton>
-        <DoodleButton style={{ padding: '6px 10px', fontSize: 12 }}>⏸</DoodleButton>
+        <DoodleButton
+          onClick={() => void window.api.focus.reset()}
+          disabled={!focusRunning && !focusPartial}
+          style={{
+            padding: '6px 10px',
+            fontSize: 12,
+            opacity: !focusRunning && !focusPartial ? 0.4 : 1,
+            cursor: !focusRunning && !focusPartial ? 'default' : 'pointer',
+          }}
+          title="重置"
+        >
+          ↺
+        </DoodleButton>
       </div>
 
       {/* Lemon tip footer */}

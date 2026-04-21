@@ -40,7 +40,7 @@ export function createTray(cb: TrayCallbacks): Tray {
     { label: '设置', click: cb.onOpenSettings },
     { label: '退出', click: cb.onQuit },
   ]);
-  tray.setToolTip('屏幕使用时间 · 云云');
+  tray.setToolTip('Fuwari · ふわり');
   tray.setContextMenu(menu);
   tray.on('double-click', showMain);
   return tray;

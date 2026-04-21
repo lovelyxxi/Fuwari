@@ -6,16 +6,20 @@ interface HoverTooltipProps { curApp: CurrentApp; todayMins: number; }
 
 export function HoverTooltip({ curApp, todayMins }: HoverTooltipProps) {
   return (
-    <div style={{
-      position: 'absolute', bottom: 'calc(100% + 12px)', left: -4,
-      background: 'var(--ink)',
-      color: 'var(--cloud-white)',
-      padding: '8px 12px',
-      borderRadius: '10px 12px 10px 12px',
-      boxShadow: '3px 3px 0 var(--line)',
-      fontSize: 12,
-      width: 200,
-    }}>
+    <div
+      data-widget-popover
+      style={{
+        position: 'absolute', bottom: 'calc(100% + 12px)', left: -4,
+        background: 'var(--ink)',
+        color: 'var(--cloud-white)',
+        padding: '8px 12px',
+        borderRadius: '10px 12px 10px 12px',
+        boxShadow: '3px 3px 0 var(--line)',
+        fontSize: 12,
+        width: 200,
+        pointerEvents: 'none',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
         <AppIcon kind={curApp.kind} size={18} /> {curApp.name}
       </div>

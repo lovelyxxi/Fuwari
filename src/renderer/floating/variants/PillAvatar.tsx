@@ -14,14 +14,13 @@ interface PillAvatarProps {
   categoryBreakdown: CategorySlice[];
 }
 
-export function PillAvatar({ state, set, curApp, todayMins, mood, categoryBreakdown }: PillAvatarProps) {
-  const onDoubleClick = () => window.api.floating.openMain();
-
+export function PillAvatar({
+  state, set, curApp, todayMins, mood, categoryBreakdown,
+}: PillAvatarProps) {
   return (
     <div style={{ position: 'relative', width: 240, display: 'inline-block' }}>
       <div
-        onClick={() => set(state === 'card' ? 'pill' : 'card')}
-        onDoubleClick={onDoubleClick}
+        data-pill-body
         style={{
           width: 72, height: 72,
           borderRadius: '50%',

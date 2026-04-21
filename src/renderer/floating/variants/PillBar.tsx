@@ -15,14 +15,13 @@ interface PillBarProps {
   categoryBreakdown: CategorySlice[];
 }
 
-export function PillBar({ state, set, curApp, todayMins, mood, categoryBreakdown }: PillBarProps) {
-  const onDoubleClick = () => window.api.floating.openMain();
-
+export function PillBar({
+  state, set, curApp, todayMins, mood, categoryBreakdown,
+}: PillBarProps) {
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <div
-        onClick={() => set(state === 'card' ? 'pill' : 'card')}
-        onDoubleClick={onDoubleClick}
+        data-pill-body
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '6px 14px 6px 6px',

@@ -14,6 +14,8 @@ export const CH = {
   FOCUS_RESET: 'focus:reset',
   FOCUS_SET_TASK: 'focus:set-task',
   FOCUS_UPDATE: 'focus:update',
+  FLOATING_SET_PILL_RECT: 'floating:set-pill-rect',
+  FLOATING_PILL_HOVER: 'floating:pill-hover',
 } as const;
 
 export type Channel = typeof CH[keyof typeof CH];

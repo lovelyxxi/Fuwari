@@ -9,3 +9,4 @@ out/
 *.sqlite-journal
 .DS_Store
 Thumbs.db
+.claude/

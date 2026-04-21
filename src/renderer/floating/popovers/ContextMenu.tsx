@@ -18,6 +18,7 @@ export function ContextMenu({ onClose, onAction }: ContextMenuProps) {
   return (
     <div
       onClick={onClose}
+      data-widget-popover
       style={{
         position: 'absolute', bottom: 'calc(100% + 12px)', left: 70,
         width: 220, background: 'var(--cloud-white)',

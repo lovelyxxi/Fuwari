@@ -16,6 +16,18 @@ const api: Api = {
     startDrag: (offsetX: number, offsetY: number) => ipcRenderer.send('floating:start-drag', offsetX, offsetY),
     stopDrag:  () => ipcRenderer.send('floating:stop-drag'),
     openMain:  () => ipcRenderer.send('floating:open-main'),
+    setPillRect: (rect: { x: number; y: number; w: number; h: number } | null) =>
+      ipcRenderer.send(CH.FLOATING_SET_PILL_RECT, rect),
+    onPillHover: (cb: (inside: boolean) => void) => {
+      const l = (_e: Electron.IpcRendererEvent, inside: boolean) => cb(inside);
+      ipcRenderer.on(CH.FLOATING_PILL_HOVER, l);
+      return () => { ipcRenderer.removeListener(CH.FLOATING_PILL_HOVER, l); };
+    },
+    onContextMenu: (cb: () => void) => {
+      const l = () => cb();
+      ipcRenderer.on('floating:context-menu', l);
+      return () => { ipcRenderer.removeListener('floating:context-menu', l); };
+    },
   },
   prefs: {
     get: () => ipcRenderer.invoke(CH.PREFS_GET) as Promise<Preferences>,

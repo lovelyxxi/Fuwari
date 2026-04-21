@@ -15,9 +15,9 @@ interface StandingMascotProps {
   categoryBreakdown: CategorySlice[];
 }
 
-export function StandingMascot({ state, set, curApp, todayMins, mood, categoryBreakdown }: StandingMascotProps) {
-  const onDoubleClick = () => window.api.floating.openMain();
-
+export function StandingMascot({
+  state, set, curApp, todayMins, mood, categoryBreakdown,
+}: StandingMascotProps) {
   return (
     <div style={{ position: 'relative', display: 'inline-block', width: 120, height: 120 }}>
       <div style={{
@@ -28,8 +28,7 @@ export function StandingMascot({ state, set, curApp, todayMins, mood, categoryBr
         borderRadius: '50%', filter: 'blur(2px)',
       }} />
       <div
-        onClick={() => set(state === 'card' ? 'pill' : 'card')}
-        onDoubleClick={onDoubleClick}
+        data-pill-body
         style={{
           position: 'absolute', top: 0, left: 0, width: 120,
           cursor: 'grab',
