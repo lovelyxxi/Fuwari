@@ -4,6 +4,9 @@ import { Sidebar, type TabKey } from './Sidebar';
 import { TabToday } from './tabs/TabToday';
 import { TabApps } from './tabs/TabApps';
 import { TabTimeline } from './tabs/TabTimeline';
+import { TabStats } from './tabs/TabStats';
+import { TabFocus } from './tabs/TabFocus';
+import { TabSettings } from './tabs/TabSettings';
 
 export function MainWindow() {
   const [tab, setTab] = useState<TabKey>('today');
@@ -15,9 +18,9 @@ export function MainWindow() {
           {tab === 'today'    && <TabToday />}
           {tab === 'apps'     && <TabApps />}
           {tab === 'timeline' && <TabTimeline />}
-          {tab !== 'today' && tab !== 'apps' && tab !== 'timeline' && (
-            <div style={{ padding: 40, fontFamily: 'var(--font-hand)', fontSize: 28 }}>{tab} coming soon</div>
-          )}
+          {tab === 'stats'    && <TabStats />}
+          {tab === 'focus'    && <TabFocus />}
+          {tab === 'settings' && <TabSettings />}
         </div>
       </div>
     </WinChrome>
