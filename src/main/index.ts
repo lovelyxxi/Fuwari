@@ -1,7 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
+import { createFloatingWindow } from './windows/floatingWindow';
 
 const isDev = !app.isPackaged;
+
+let mainWin: BrowserWindow | null = null;
+let floatWin: BrowserWindow | null = null;
 
 function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -36,9 +40,15 @@ app.whenReady().then(() => {
     else w?.maximize();
   });
   ipcMain.handle('win:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
-  createMainWindow();
+
+  mainWin = createMainWindow();
+  floatWin = createFloatingWindow();
+
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      mainWin = createMainWindow();
+      floatWin = createFloatingWindow();
+    }
   });
 });
 
