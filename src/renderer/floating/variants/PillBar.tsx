@@ -15,10 +15,24 @@ interface PillBarProps {
 }
 
 export function PillBar({ state, set, curApp, todayMins, mood }: PillBarProps) {
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    window.api.floating.startDrag(e.clientX, e.clientY);
+    const stop = () => {
+      window.api.floating.stopDrag();
+      window.removeEventListener('mouseup', stop);
+    };
+    window.addEventListener('mouseup', stop);
+  };
+
+  const onDoubleClick = () => window.api.floating.openMain();
+
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <div
         onClick={() => set(state === 'card' ? 'pill' : 'card')}
+        onMouseDown={onMouseDown}
+        onDoubleClick={onDoubleClick}
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '6px 14px 6px 6px',

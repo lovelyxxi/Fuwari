@@ -15,6 +15,18 @@ interface StandingMascotProps {
 }
 
 export function StandingMascot({ state, set, curApp, todayMins, mood }: StandingMascotProps) {
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    window.api.floating.startDrag(e.clientX, e.clientY);
+    const stop = () => {
+      window.api.floating.stopDrag();
+      window.removeEventListener('mouseup', stop);
+    };
+    window.addEventListener('mouseup', stop);
+  };
+
+  const onDoubleClick = () => window.api.floating.openMain();
+
   return (
     <div style={{ position: 'relative', display: 'inline-block', width: 120, height: 120 }}>
       <div style={{
@@ -27,6 +39,8 @@ export function StandingMascot({ state, set, curApp, todayMins, mood }: Standing
       <div
         style={{ position: 'absolute', top: 0, left: 0, width: 120, cursor: 'pointer' }}
         onClick={() => set(state === 'card' ? 'pill' : 'card')}
+        onMouseDown={onMouseDown}
+        onDoubleClick={onDoubleClick}
       >
         <JellyMascot size={110} mood={mood} />
       </div>

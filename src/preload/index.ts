@@ -11,6 +11,11 @@ const api: Api = {
     maximize: () => { void ipcRenderer.invoke('win:maximize'); },
     close:    () => { void ipcRenderer.invoke('win:close'); },
   },
+  floating: {
+    startDrag: (offsetX: number, offsetY: number) => ipcRenderer.send('floating:start-drag', offsetX, offsetY),
+    stopDrag:  () => ipcRenderer.send('floating:stop-drag'),
+    openMain:  () => ipcRenderer.send('floating:open-main'),
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

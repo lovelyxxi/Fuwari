@@ -14,10 +14,24 @@ interface PillAvatarProps {
 }
 
 export function PillAvatar({ state, set, curApp, todayMins, mood }: PillAvatarProps) {
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    window.api.floating.startDrag(e.clientX, e.clientY);
+    const stop = () => {
+      window.api.floating.stopDrag();
+      window.removeEventListener('mouseup', stop);
+    };
+    window.addEventListener('mouseup', stop);
+  };
+
+  const onDoubleClick = () => window.api.floating.openMain();
+
   return (
     <div style={{ position: 'relative', width: 240, display: 'inline-block' }}>
       <div
         onClick={() => set(state === 'card' ? 'pill' : 'card')}
+        onMouseDown={onMouseDown}
+        onDoubleClick={onDoubleClick}
         style={{
           width: 72, height: 72,
           borderRadius: '50%',

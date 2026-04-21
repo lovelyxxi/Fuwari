@@ -7,4 +7,9 @@ export interface Api {
     maximize: () => void;
     close: () => void;
   };
+  floating: {
+    startDrag: (offsetX: number, offsetY: number) => void;
+    stopDrag: () => void;
+    openMain: () => void;
+  };
 }
