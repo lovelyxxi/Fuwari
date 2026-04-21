@@ -1,4 +1,4 @@
-# Handoff: 屏幕使用时间 · 云云 (Screen Time "CloudCloud")
+# Handoff: 屏幕使用时间 · Fuwari
 
 > Windows 桌面端屏幕使用时间监控应用 — 手绘涂鸦风格，带云朵吉祥物和桌面悬浮窗。
 
