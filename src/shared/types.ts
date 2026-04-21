@@ -47,6 +47,14 @@ export interface TodaySummary {
   hourly: number[];            // 24 numbers, minutes per hour
 }
 
+export interface CurrentAppInfo {
+  appExe: string;
+  appName: string;
+  category: string;
+  currentSessionMins: number;
+  sessionStartedAt: number;
+}
+
 export interface Api {
   getWindowKind: () => WindowKind;
   win: {
