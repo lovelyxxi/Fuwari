@@ -34,6 +34,7 @@
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "^4.6.2",
     "happy-dom": "^15.7.4",
+    "jsdom": "^29.0.2",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -43,8 +44,16 @@
   "build": {
     "appId": "app.cloudcloud.screentime",
     "productName": "CloudCloud",
-    "directories": { "output": "dist" },
-    "files": ["out/**/*"],
-    "win": { "target": ["nsis"] }
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
   }
 }
