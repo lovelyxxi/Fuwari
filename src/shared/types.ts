@@ -30,6 +30,23 @@ export const DEFAULT_PREFS: Preferences = {
   appLimits: {},
 };
 
+export interface UsageEvent {
+  id?: number;
+  appExe: string;
+  appName: string;
+  startedAt: number;   // unix ms
+  endedAt: number;     // unix ms
+  category: string;
+}
+
+export interface TodaySummary {
+  dateMs: number;              // midnight of the day
+  totalMins: number;
+  byApp: { appName: string; appExe: string; category: string; mins: number }[];
+  byCategory: Record<string, number>;
+  hourly: number[];            // 24 numbers, minutes per hour
+}
+
 export interface Api {
   getWindowKind: () => WindowKind;
   win: {
