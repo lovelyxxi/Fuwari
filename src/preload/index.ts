@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 import type { Api, WindowKind } from '../shared/types';
 
 const kind: WindowKind =
@@ -6,6 +6,11 @@ const kind: WindowKind =
 
 const api: Api = {
   getWindowKind: () => kind,
+  win: {
+    minimize: () => { void ipcRenderer.invoke('win:minimize'); },
+    maximize: () => { void ipcRenderer.invoke('win:maximize'); },
+    close:    () => { void ipcRenderer.invoke('win:close'); },
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 
 const isDev = !app.isPackaged;
@@ -29,6 +29,13 @@ function createMainWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
+  ipcMain.handle('win:maximize', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender);
+    if (w?.isMaximized()) w.unmaximize();
+    else w?.maximize();
+  });
+  ipcMain.handle('win:close', (e) => BrowserWindow.fromWebContents(e.sender)?.close());
   createMainWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
