@@ -1,3 +1,6 @@
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/doodle.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';

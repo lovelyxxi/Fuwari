@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;700&display=swap');
+
+:root {
+  --paper: #F5F1E8;
+  --paper-deep: #ECE6D6;
+  --ink: #2A2A3C;
+  --ink-soft: #5A5A72;
+  --ink-mute: #9A9AB0;
+
+  --blue: #A4C8F0;
+  --blue-deep: #7FA8D6;
+  --lilac: #C8B6FF;
+  --lilac-deep: #A88FE3;
+  --mint: #B8E0D2;
+  --mint-deep: #8FC4B0;
+  --peach: #FFCFB8;
+  --peach-deep: #E8A085;
+  --lemon: #FFE5A8;
+
+  --cloud-white: #FDFCF8;
+  --line: #2A2A3C;
+  --shadow-ink: rgba(42, 42, 60, 0.12);
+
+  --font-sans: 'Nunito', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-hand: 'Caveat', 'Gaegu', 'Nunito', cursive;
+  --font-hand-cn: 'Gaegu', 'Nunito', 'PingFang SC', cursive;
+}
+
+.theme-dark {
+  --paper: #1E1E2A;
+  --paper-deep: #151520;
+  --ink: #F0ECE0;
+  --ink-soft: #BDBACF;
+  --ink-mute: #6A6A82;
+  --cloud-white: #2A2A3A;
+  --line: #F0ECE0;
+  --shadow-ink: rgba(0, 0, 0, 0.4);
+}

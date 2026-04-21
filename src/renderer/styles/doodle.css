@@ -1,0 +1,139 @@
+/* 涂鸦风 — 不规则手绘边框 */
+.doodle-border {
+  border: 2px solid var(--line);
+  border-radius: 18px 22px 20px 24px / 22px 18px 24px 20px;
+  background: var(--cloud-white);
+  position: relative;
+}
+.doodle-border.b-tight {
+  border-radius: 12px 14px 13px 15px / 14px 12px 15px 13px;
+}
+.doodle-border.b-round {
+  border-radius: 50% 48% 52% 50% / 48% 52% 50% 48%;
+}
+
+/* 轻微手绘下划线 */
+.hand-underline {
+  background-image: linear-gradient(transparent 85%, var(--lemon) 85%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding: 0 3px;
+}
+
+/* 手绘风按钮 */
+.btn-doodle {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border: 2px solid var(--line);
+  background: var(--cloud-white);
+  color: var(--ink);
+  padding: 8px 16px;
+  border-radius: 14px 18px 15px 17px / 17px 14px 18px 15px;
+  box-shadow: 3px 3px 0 var(--line);
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+  font-size: 14px;
+}
+.btn-doodle:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--line); }
+.btn-doodle:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--line); }
+.btn-doodle.primary { background: var(--lilac); }
+.btn-doodle.mint { background: var(--mint); }
+.btn-doodle.blue { background: var(--blue); }
+.btn-doodle.peach { background: var(--peach); }
+
+/* 纸张纹理 */
+.paper-bg {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(42,42,60,0.018) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(42,42,60,0.018) 0, transparent 40%);
+}
+.paper-bg-lines {
+  background-color: var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(42,42,60,0.04) 31px, rgba(42,42,60,0.04) 32px);
+}
+
+/* 手绘小分隔线 */
+.hr-wavy {
+  height: 8px;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'><path d='M0 4 Q 10 0 20 4 T 40 4 T 60 4 T 80 4 T 100 4 T 120 4 T 140 4 T 160 4 T 180 4 T 200 4' fill='none' stroke='%232A2A3C' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 200px 8px;
+}
+
+/* 手绘 tab */
+.tab-doodle {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 14px;
+  color: var(--ink-soft);
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px 14px 12px 14px;
+  position: relative;
+}
+.tab-doodle.active {
+  color: var(--ink);
+  border-color: var(--line);
+  background: var(--cloud-white);
+  box-shadow: 2px 2px 0 var(--line);
+}
+
+/* 小标签 */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--cloud-white);
+}
+
+/* 滚动条隐藏 */
+.scroll-hide::-webkit-scrollbar { display: none; }
+.scroll-hide { scrollbar-width: none; }
+
+/* 云朵浮动 */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(2deg); }
+}
+.animate-floaty { animation: floaty 4s ease-in-out infinite; }
+
+@keyframes wobble {
+  0%,100% { transform: rotate(-1.5deg); }
+  50%     { transform: rotate(1.5deg); }
+}
+.animate-wobble { animation: wobble 3s ease-in-out infinite; }
+
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.animate-blink { animation: blink 4s infinite; transform-origin: center; }
+
+/* 虚线边框（手绘风） */
+.dash-border {
+  border: 1.5px dashed var(--ink-soft);
+  border-radius: 12px;
+}
+
+/* 小圆点背景 */
+.dots-bg {
+  background-image: radial-gradient(circle, rgba(42,42,60,0.1) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+}
+
+/* 条形图柱 —  顶部手绘线感 */
+.bar-doodle {
+  border: 2px solid var(--line);
+  border-radius: 6px 8px 2px 2px / 8px 6px 2px 2px;
+  position: relative;
+}
