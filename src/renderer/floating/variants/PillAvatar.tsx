@@ -2,7 +2,7 @@ import { CloudMascot } from '../../components/mascots/CloudMascot';
 import { ExpandedCard } from '../popovers/ExpandedCard';
 import { HoverTooltip } from '../popovers/HoverTooltip';
 import { ContextMenu } from '../popovers/ContextMenu';
-import type { WidgetState, CurrentApp } from '../FloatingWidget';
+import type { WidgetState, CurrentApp, CategorySlice } from '../FloatingWidget';
 import type { Mood } from '@shared/tokens';
 
 interface PillAvatarProps {
@@ -11,26 +11,16 @@ interface PillAvatarProps {
   curApp: CurrentApp;
   todayMins: number;
   mood: Mood;
+  categoryBreakdown: CategorySlice[];
 }
 
-export function PillAvatar({ state, set, curApp, todayMins, mood }: PillAvatarProps) {
-  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    window.api.floating.startDrag(e.clientX, e.clientY);
-    const stop = () => {
-      window.api.floating.stopDrag();
-      window.removeEventListener('mouseup', stop);
-    };
-    window.addEventListener('mouseup', stop);
-  };
-
+export function PillAvatar({ state, set, curApp, todayMins, mood, categoryBreakdown }: PillAvatarProps) {
   const onDoubleClick = () => window.api.floating.openMain();
 
   return (
     <div style={{ position: 'relative', width: 240, display: 'inline-block' }}>
       <div
         onClick={() => set(state === 'card' ? 'pill' : 'card')}
-        onMouseDown={onMouseDown}
         onDoubleClick={onDoubleClick}
         style={{
           width: 72, height: 72,
@@ -40,7 +30,9 @@ export function PillAvatar({ state, set, curApp, todayMins, mood }: PillAvatarPr
           boxShadow: '3px 4px 0 var(--line), 0 6px 20px rgba(42,42,60,0.18)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative',
-          cursor: 'pointer',
+          cursor: 'grab',
+          // @ts-expect-error non-standard CSS property handled by Electron — OS-native window drag
+          WebkitAppRegion: 'drag',
         }}
       >
         <CloudMascot size={56} mood={mood} />
@@ -67,7 +59,15 @@ export function PillAvatar({ state, set, curApp, todayMins, mood }: PillAvatarPr
         }}>⋮⋮</div>
       </div>
 
-      {state === 'card' && <ExpandedCard curApp={curApp} todayMins={todayMins} mood={mood} onClose={() => set('pill')} />}
+      {state === 'card' && (
+        <ExpandedCard
+          curApp={curApp}
+          todayMins={todayMins}
+          mood={mood}
+          categoryBreakdown={categoryBreakdown}
+          onClose={() => set('pill')}
+        />
+      )}
       {state === 'tooltip' && <HoverTooltip curApp={curApp} todayMins={todayMins} />}
       {state === 'menu' && <ContextMenu onClose={() => set('pill')} />}
     </div>

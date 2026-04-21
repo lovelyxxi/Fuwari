@@ -5,32 +5,49 @@ interface WinBtnProps {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-const ICONS = {
-  min:   <line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />,
-  max:   <rect x="2" y="2" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="1.3" />,
-  close: (
-    <g stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-      <line x1="2" y1="2" x2="10" y2="10" />
-      <line x1="10" y1="2" x2="2" y2="10" />
-    </g>
-  ),
+const STYLES: Record<WinBtnProps['kind'], { bg: string; glyph: string; label: string }> = {
+  close: { bg: 'var(--peach)', glyph: '×', label: '关闭' },
+  min:   { bg: 'var(--lemon)', glyph: '−', label: '最小化' },
+  max:   { bg: 'var(--mint)',  glyph: '+', label: '最大化' },
 };
 
 export function WinBtn({ kind, onClick }: WinBtnProps) {
   const [hover, setHover] = useState(false);
-  const bg = hover ? (kind === 'close' ? 'var(--peach)' : 'var(--paper-deep)') : 'transparent';
+  const s = STYLES[kind];
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      aria-label={s.label}
+      title={s.label}
       style={{
-        width: 46, height: 36, border: 'none', background: bg,
-        borderLeft: '1.5px solid var(--line)', color: 'var(--ink)', cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: 14,
+        height: 14,
+        padding: 0,
+        border: '1.5px solid var(--line)',
+        borderRadius: '50% 48% 52% 50% / 48% 52% 50% 48%',
+        background: s.bg,
+        color: 'var(--ink)',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 10,
+        fontWeight: 800,
+        lineHeight: 1,
+        boxShadow: '1px 1px 0 rgba(42,42,60,0.25)',
       }}
     >
-      <svg width="12" height="12" viewBox="0 0 12 12">{ICONS[kind]}</svg>
+      <span
+        style={{
+          opacity: hover ? 1 : 0,
+          transition: 'opacity .12s',
+          transform: 'translateY(-0.5px)',
+        }}
+      >
+        {s.glyph}
+      </span>
     </button>
   );
 }

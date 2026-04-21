@@ -7,6 +7,7 @@ import type { AppIconKind } from '../components/primitives/AppIcon';
 
 export type WidgetState = 'pill' | 'card' | 'tooltip' | 'menu';
 export interface CurrentApp { name: string; kind: AppIconKind; mins: number; }
+export interface CategorySlice { name: string; mins: number; color: string; }
 
 interface FloatingWidgetProps {
   variant?: FloatingVariant;
@@ -14,6 +15,7 @@ interface FloatingWidgetProps {
   mood?: Mood;
   curApp: CurrentApp;
   todayMins: number;
+  categoryBreakdown: CategorySlice[];
   onStateChange?: (s: WidgetState) => void;
 }
 
@@ -23,13 +25,14 @@ export function FloatingWidget({
   mood = 'happy',
   curApp,
   todayMins,
+  categoryBreakdown,
   onStateChange,
 }: FloatingWidgetProps) {
   const [state, setState] = useState<WidgetState>(forcedState ?? 'pill');
   useEffect(() => { if (forcedState) setState(forcedState); }, [forcedState]);
   const set = (s: WidgetState) => { setState(s); onStateChange?.(s); };
 
-  const common = { state, set, curApp, todayMins, mood };
+  const common = { state, set, curApp, todayMins, mood, categoryBreakdown };
   if (variant === 'B') return <PillBar {...common} />;
   if (variant === 'C') return <StandingMascot {...common} />;
   return <PillAvatar {...common} />;

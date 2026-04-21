@@ -2,7 +2,11 @@ import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import path from 'node:path';
 import { createFloatingWindow } from './windows/floatingWindow';
 import { PreferencesStore } from './services/preferences';
-import { registerPrefsHandlers } from './ipc/handlers';
+import { registerPrefsHandlers, registerDataHandlers } from './ipc/handlers';
+import { openDatabase } from './services/database';
+import { EventRepository } from './services/repository';
+import { Tracker } from './services/tracker';
+import { IdleMonitor } from './services/idle';
 
 const isDev = !app.isPackaged;
 
@@ -58,6 +62,25 @@ app.whenReady().then(async () => {
   prefs = new PreferencesStore(app.getPath('userData'));
   await prefs.load();
   registerPrefsHandlers(prefs);
+
+  const dbPath = path.join(app.getPath('userData'), 'events.sqlite');
+  const db = openDatabase(dbPath);
+  const repo = new EventRepository(db);
+  const tracker = new Tracker(repo);
+  const idleMon = new IdleMonitor();
+
+  tracker.start();
+  idleMon.start();
+  idleMon.on('idle', () => { if (prefs.get().idleDetection) tracker.pause(); });
+  idleMon.on('active', () => tracker.resume());
+
+  registerDataHandlers(repo, prefs, tracker, null);
+
+  app.on('before-quit', () => {
+    tracker.stop();
+    idleMon.stop();
+    db.close();
+  });
 
   ipcMain.handle('win:minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize());
   ipcMain.handle('win:maximize', (e) => {

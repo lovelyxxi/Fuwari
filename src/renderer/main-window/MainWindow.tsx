@@ -7,15 +7,18 @@ import { TabTimeline } from './tabs/TabTimeline';
 import { TabStats } from './tabs/TabStats';
 import { TabFocus } from './tabs/TabFocus';
 import { TabSettings } from './tabs/TabSettings';
+import type { MascotKind } from '@shared/tokens';
 
-export function MainWindow() {
+interface MainWindowProps { mascotKind?: MascotKind; }
+
+export function MainWindow({ mascotKind = 'cloud' }: MainWindowProps) {
   const [tab, setTab] = useState<TabKey>('today');
   return (
     <WinChrome>
       <div style={{ flex: 1, display: 'flex', minHeight: 0, background: 'var(--paper)' }}>
-        <Sidebar active={tab} onChange={setTab} />
+        <Sidebar active={tab} onChange={setTab} mascotKind={mascotKind} />
         <div className="scroll-hide" style={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
-          {tab === 'today'    && <TabToday />}
+          {tab === 'today'    && <TabToday mascotKind={mascotKind} />}
           {tab === 'apps'     && <TabApps />}
           {tab === 'timeline' && <TabTimeline />}
           {tab === 'stats'    && <TabStats />}

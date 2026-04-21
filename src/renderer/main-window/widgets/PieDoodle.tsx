@@ -1,15 +1,18 @@
-import { CATEGORIES } from '../../state/mockData';
+export interface PieSlice { name: string; mins: number; color: string; }
 
-interface PieDoodleProps { size?: number; }
+interface PieDoodleProps {
+  size?: number;
+  slices: PieSlice[];
+}
 
-export function PieDoodle({ size = 160 }: PieDoodleProps) {
-  const total = CATEGORIES.reduce((s, c) => s + c.mins, 0);
+export function PieDoodle({ size = 160, slices }: PieDoodleProps) {
+  const total = slices.reduce((s, c) => s + c.mins, 0) || 1;
   let acc = 0;
   const r = size / 2 - 14;
   const cx = size / 2, cy = size / 2;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {CATEGORIES.map((c) => {
+      {slices.map((c) => {
         const start = (acc / total) * Math.PI * 2 - Math.PI / 2;
         acc += c.mins;
         const end = (acc / total) * Math.PI * 2 - Math.PI / 2;

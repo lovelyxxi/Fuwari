@@ -2,18 +2,18 @@ import { AppIcon } from '../../components/primitives/AppIcon';
 import { CloudMascot } from '../../components/mascots/CloudMascot';
 import { DoodleButton } from '../../components/primitives/DoodleButton';
 import { fmtMins } from '../../utils/fmt';
-import { CATEGORIES } from '../../state/mockData';
 import type { Mood } from '@shared/tokens';
-import type { CurrentApp } from '../FloatingWidget';
+import type { CurrentApp, CategorySlice } from '../FloatingWidget';
 
 interface ExpandedCardProps {
   curApp: CurrentApp;
   todayMins: number;
   mood: Mood;
+  categoryBreakdown: CategorySlice[];
   onClose: () => void;
 }
 
-export function ExpandedCard({ curApp, todayMins, mood, onClose }: ExpandedCardProps) {
+export function ExpandedCard({ curApp, todayMins, mood, categoryBreakdown, onClose }: ExpandedCardProps) {
   return (
     <div
       className="doodle-border"
@@ -25,6 +25,8 @@ export function ExpandedCard({ curApp, todayMins, mood, onClose }: ExpandedCardP
         padding: '14px 16px',
         background: 'var(--cloud-white)',
         boxShadow: '4px 5px 0 var(--line), 0 10px 30px rgba(42,42,60,0.22)',
+        // @ts-expect-error non-standard CSS property handled by Electron
+        WebkitAppRegion: 'no-drag',
       }}
     >
       {/* Inverted-triangle tail pointing down */}
@@ -97,31 +99,34 @@ export function ExpandedCard({ curApp, todayMins, mood, onClose }: ExpandedCardP
           </div>
         </div>
         <div style={{ flex: 1 }} />
-        <span className="chip" style={{ background: 'var(--mint)' }}>↓ 比昨天少</span>
+        <span className="chip" style={{ background: 'var(--mint)' }}>专注记录中</span>
       </div>
 
       {/* Category strip */}
-      <div
-        style={{
+      {categoryBreakdown.length > 0 && (
+        <div style={{
           display: 'flex',
           height: 8,
-          border: '1.5px solid var(--line)',
           borderRadius: 4,
           overflow: 'hidden',
+          border: '1.5px solid var(--line)',
           marginTop: 10,
-        }}
-      >
-        {CATEGORIES.map((c, i) => (
-          <div
-            key={c.name}
-            style={{
-              background: c.color,
-              width: `${(c.mins / 524) * 100}%`,
-              borderRight: i < CATEGORIES.length - 1 ? '1.5px solid var(--line)' : 'none',
-            }}
-          />
-        ))}
-      </div>
+        }}>
+          {categoryBreakdown.map((c, i) => {
+            const total = categoryBreakdown.reduce((s, x) => s + x.mins, 0) || 1;
+            return (
+              <div
+                key={c.name}
+                style={{
+                  background: c.color,
+                  width: `${(c.mins / total) * 100}%`,
+                  borderRight: i < categoryBreakdown.length - 1 ? '1.5px solid var(--line)' : 'none',
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* 3-button row */}
       <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>

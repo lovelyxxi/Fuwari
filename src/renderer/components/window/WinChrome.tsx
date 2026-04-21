@@ -3,12 +3,11 @@ import { CloudMascot } from '../mascots/CloudMascot';
 import { WinBtn } from './WinBtn';
 
 interface WinChromeProps {
-  title?: string;
   children: ReactNode;
   dark?: boolean;
 }
 
-export function WinChrome({ title = '屏幕使用时间 · 云云', children, dark }: WinChromeProps) {
+export function WinChrome({ children, dark }: WinChromeProps) {
   return (
     <div className={dark ? 'theme-dark' : ''} style={{
       width: '100%', height: '100vh',
@@ -27,22 +26,25 @@ export function WinChrome({ title = '屏幕使用时间 · 云云', children, da
           display: 'flex', alignItems: 'center',
           borderBottom: '2px solid var(--line)',
           background: 'var(--cloud-white)',
-          paddingLeft: 12,
+          paddingLeft: 14,
+          paddingRight: 14,
           // @ts-expect-error non-standard CSS property handled by Electron
           WebkitAppRegion: 'drag',
         }}
       >
-        <CloudMascot size={26} mood="happy" wobble={false} />
-        <div style={{ marginLeft: 10, fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{title}</div>
-        <div style={{ marginLeft: 10, fontSize: 11, color: 'var(--ink-mute)', fontFamily: 'var(--font-hand)' }}>
-          — 陪你看时间慢慢走
-        </div>
+        <CloudMascot size={24} mood="happy" wobble={false} />
         <div style={{ flex: 1 }} />
-        <div style={{
-          display: 'flex',
-          // @ts-expect-error non-standard CSS property handled by Electron
-          WebkitAppRegion: 'no-drag',
-        }}>
+
+        {/* macOS-style traffic lights — close / min / max — moved to the right */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            // @ts-expect-error non-standard CSS property handled by Electron
+            WebkitAppRegion: 'no-drag',
+          }}
+        >
           <WinBtn kind="min"   onClick={() => window.api.win.minimize()} />
           <WinBtn kind="max"   onClick={() => window.api.win.maximize()} />
           <WinBtn kind="close" onClick={() => window.api.win.close()} />

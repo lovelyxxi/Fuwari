@@ -26,6 +26,8 @@ export function ContextMenu({ onClose, onAction }: ContextMenuProps) {
         boxShadow: '4px 4px 0 var(--line)',
         padding: 6,
         fontFamily: 'var(--font-sans)',
+        // @ts-expect-error non-standard CSS property handled by Electron
+        WebkitAppRegion: 'no-drag',
       }}
     >
       {items.map((it, i) =>

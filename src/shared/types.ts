@@ -55,6 +55,14 @@ export interface CurrentAppInfo {
   sessionStartedAt: number;
 }
 
+import type { Mood } from './tokens';
+
+export interface TickPayload {
+  current: CurrentAppInfo | null;
+  today: TodaySummary;
+  mood: Mood;
+}
+
 export interface Api {
   getWindowKind: () => WindowKind;
   win: {
@@ -71,5 +79,13 @@ export interface Api {
     get: () => Promise<Preferences>;
     set: <K extends keyof Preferences>(key: K, value: Preferences[K]) => Promise<Preferences>;
     onChange: (cb: (p: Preferences) => void) => () => void;
+  };
+  data: {
+    getToday: () => Promise<TodaySummary>;
+    getWeek: () => Promise<TodaySummary[]>;
+    clearAll: () => Promise<void>;
+    exportAll: () => Promise<UsageEvent[]>;
+    onTick: (cb: (p: TickPayload) => void) => () => void;
+    onCurrentApp: (cb: (info: CurrentAppInfo | null) => void) => () => void;
   };
 }

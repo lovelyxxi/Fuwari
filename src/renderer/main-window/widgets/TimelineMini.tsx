@@ -1,13 +1,11 @@
-import { HOURLY } from '../../state/mockData';
+interface TimelineMiniProps { hourly: number[]; nowHour?: number; }
 
-interface TimelineMiniProps { nowHour?: number; }
-
-export function TimelineMini({ nowHour = 15 }: TimelineMiniProps) {
-  const max = Math.max(...HOURLY);
+export function TimelineMini({ hourly, nowHour = new Date().getHours() }: TimelineMiniProps) {
+  const max = Math.max(1, ...hourly);
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 52 }}>
-      {HOURLY.map((v, i) => {
-        const hPx = max === 0 ? 0 : (v / max) * 48 + (v > 0 ? 4 : 0);
+      {hourly.map((v, i) => {
+        const hPx = (v / max) * 48 + (v > 0 ? 4 : 0);
         const isNow = i === nowHour;
         return (
           <div key={i} style={{

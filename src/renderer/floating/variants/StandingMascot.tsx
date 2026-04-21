@@ -3,7 +3,7 @@ import { ExpandedCard } from '../popovers/ExpandedCard';
 import { HoverTooltip } from '../popovers/HoverTooltip';
 import { ContextMenu } from '../popovers/ContextMenu';
 import { fmtMins } from '../../utils/fmt';
-import type { WidgetState, CurrentApp } from '../FloatingWidget';
+import type { WidgetState, CurrentApp, CategorySlice } from '../FloatingWidget';
 import type { Mood } from '@shared/tokens';
 
 interface StandingMascotProps {
@@ -12,19 +12,10 @@ interface StandingMascotProps {
   curApp: CurrentApp;
   todayMins: number;
   mood: Mood;
+  categoryBreakdown: CategorySlice[];
 }
 
-export function StandingMascot({ state, set, curApp, todayMins, mood }: StandingMascotProps) {
-  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    window.api.floating.startDrag(e.clientX, e.clientY);
-    const stop = () => {
-      window.api.floating.stopDrag();
-      window.removeEventListener('mouseup', stop);
-    };
-    window.addEventListener('mouseup', stop);
-  };
-
+export function StandingMascot({ state, set, curApp, todayMins, mood, categoryBreakdown }: StandingMascotProps) {
   const onDoubleClick = () => window.api.floating.openMain();
 
   return (
@@ -37,10 +28,14 @@ export function StandingMascot({ state, set, curApp, todayMins, mood }: Standing
         borderRadius: '50%', filter: 'blur(2px)',
       }} />
       <div
-        style={{ position: 'absolute', top: 0, left: 0, width: 120, cursor: 'pointer' }}
         onClick={() => set(state === 'card' ? 'pill' : 'card')}
-        onMouseDown={onMouseDown}
         onDoubleClick={onDoubleClick}
+        style={{
+          position: 'absolute', top: 0, left: 0, width: 120,
+          cursor: 'grab',
+          // @ts-expect-error non-standard CSS property handled by Electron — OS-native window drag
+          WebkitAppRegion: 'drag',
+        }}
       >
         <JellyMascot size={110} mood={mood} />
       </div>
@@ -57,7 +52,15 @@ export function StandingMascot({ state, set, curApp, todayMins, mood }: Standing
         {fmtMins(curApp.mins)} @ {curApp.name}
       </div>
 
-      {state === 'card' && <ExpandedCard curApp={curApp} todayMins={todayMins} mood={mood} onClose={() => set('pill')} />}
+      {state === 'card' && (
+        <ExpandedCard
+          curApp={curApp}
+          todayMins={todayMins}
+          mood={mood}
+          categoryBreakdown={categoryBreakdown}
+          onClose={() => set('pill')}
+        />
+      )}
       {state === 'tooltip' && <HoverTooltip curApp={curApp} todayMins={todayMins} />}
       {state === 'menu' && <ContextMenu onClose={() => set('pill')} />}
     </div>

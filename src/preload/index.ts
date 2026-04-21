@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Api, WindowKind, Preferences } from '../shared/types';
+import type { Api, WindowKind, Preferences, TodaySummary, UsageEvent, TickPayload, CurrentAppInfo } from '../shared/types';
 import { CH } from '../shared/channels';
 
 const kind: WindowKind =
@@ -25,6 +25,22 @@ const api: Api = {
       const listener = (_e: Electron.IpcRendererEvent, p: Preferences) => cb(p);
       ipcRenderer.on(CH.PREFS_CHANGED, listener);
       return () => { ipcRenderer.removeListener(CH.PREFS_CHANGED, listener); };
+    },
+  },
+  data: {
+    getToday:  (): Promise<TodaySummary>    => ipcRenderer.invoke(CH.TODAY_GET),
+    getWeek:   (): Promise<TodaySummary[]>  => ipcRenderer.invoke(CH.HISTORY_GET_WEEK),
+    clearAll:  (): Promise<void>            => ipcRenderer.invoke(CH.EVENTS_CLEAR),
+    exportAll: (): Promise<UsageEvent[]>    => ipcRenderer.invoke(CH.EVENTS_EXPORT),
+    onTick: (cb: (p: TickPayload) => void) => {
+      const l = (_e: Electron.IpcRendererEvent, p: TickPayload) => cb(p);
+      ipcRenderer.on(CH.TICK, l);
+      return () => { ipcRenderer.removeListener(CH.TICK, l); };
+    },
+    onCurrentApp: (cb: (info: CurrentAppInfo | null) => void) => {
+      const l = (_e: Electron.IpcRendererEvent, info: CurrentAppInfo | null) => cb(info);
+      ipcRenderer.on(CH.CURRENT_APP, l);
+      return () => { ipcRenderer.removeListener(CH.CURRENT_APP, l); };
     },
   },
 };
